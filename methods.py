@@ -63,14 +63,14 @@ class TeamCity:
             res = json.loads(resp.read().decode())
             return True, [o['name'] for o in res['branch']]
 
-    def run_build(self, service, branch):
+    def run_build(self, service, branch, personal=False):
         url = urllib.parse.urljoin(self.tc_host, '/app/rest/buildQueue')
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/xml',
         }
-        data = ('<build personal="true" branchName="{}"><buildType id="{}"/></build>'
-                .format(branch, service)).encode()
+        data = ('<build personal="{}" branchName="{}"><buildType id="{}"/></build>'
+                .format('true' if personal else 'false', branch, service)).encode()
         req = urllib.request.Request(url, data, headers, method='POST')
         with urllib.request.urlopen(req) as resp:
             return resp.code == 200

@@ -1,28 +1,39 @@
 import argparse
-from .methods import TeamCity
+from methods import TeamCity
 
 
 def create_parser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-b', '--branch', default='refs/heads/master', help='Build branch')
-    parser.add_argument('-s', '--services', nargs='+', help='Services to build')
-    parser.add_argument('-l', '--list', action='store_true', default=False, help='Show services')
-    return parser
+    p = argparse.ArgumentParser()
+    p.add_argument('-b', '--branch', default='refs/heads/master', help='Build branch')
+    p.add_argument('-s', '--services', nargs='+', help='Services to build')
+    p.add_argument('-l', '--list', action='store_true', default=False, help='Show services')
+    p.add_argument('-p', '--personal', action='store_true', default=False, help='Personal build')
+    return p
 
 
 if __name__ == '__main__':
     tc = TeamCity()
     parser = create_parser()
     args = parser.parse_args()
+    if not args.list and not args.services:
+        print('Specify arguments')
+        exit()
+
     if args.list:
-        print(tc.get_services()[1])
+        ok, pairs = tc.get_services()
+        if ok:
+            print('Title -> Key')
+            for k, v in pairs:
+                print(v, k, sep=' -> ')
+        else:
+            print('Error')
         exit()
 
     branch = args.branch
     if not branch:
         raise Warning('Specify branch')
     for service in args.services:
-        if tc.run_build(service, branch):
+        if tc.run_build(service, branch, args.personal):
             print('Done!')
         else:
             print('Fail')
