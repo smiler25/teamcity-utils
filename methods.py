@@ -48,8 +48,8 @@ class TeamCity:
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req) as resp:
             if resp.code != 200:
-                return False, None
-            res = json.loads(resp.read().decode())
+                return False, resp.read().decode('utf-8')
+            res = json.loads(resp.read().decode('utf-8'))
             return True, [(o['id'], o['name']) for o in res['buildType']]
 
     def get_branches(self, service):
@@ -59,7 +59,7 @@ class TeamCity:
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req) as resp:
             if resp.code != 200:
-                return False, None
+                return False, resp.read().decode('utf-8')
             res = json.loads(resp.read().decode())
             return True, [o['name'] for o in res['branch']]
 
@@ -73,4 +73,6 @@ class TeamCity:
                 .format('true' if personal else 'false', branch, service)).encode()
         req = urllib.request.Request(url, data, headers, method='POST')
         with urllib.request.urlopen(req) as resp:
-            return resp.code == 200
+            if resp.code == 200:
+                return True, None
+            return False, resp.read().decode('utf-8')

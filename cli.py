@@ -26,14 +26,16 @@ if __name__ == '__main__':
             for k, v in pairs:
                 print(v, k, sep=' -> ')
         else:
-            print('Error')
+            print('Error', pairs)
         exit()
 
     branch = args.branch
     if not branch:
         raise Warning('Specify branch')
+
     for service in args.services:
-        if tc.run_build(service, branch, args.personal):
-            print('Done!')
+        ok, msg = tc.run_build(service, branch, args.personal)
+        if ok:
+            print(service, 'Done!')
         else:
-            print('Fail')
+            print(service, 'Fail', msg)
