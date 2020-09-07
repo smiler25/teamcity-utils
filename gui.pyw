@@ -20,6 +20,7 @@ class MainWindow:
         row += 1
 
         row = self.init_services_checkboxes(frame, row)
+        row += 1
         branch_label = tk.Label(frame, text='Branch', underline=0)
         branch_label.grid(row=row, column=0, padx=2, pady=2, sticky=tk.W)
         branch_entry = tk.Entry(frame, width=50, textvariable=self.branch)
@@ -93,10 +94,10 @@ class MainWindow:
 
         ok, branches = tc.get_branches(service)
         if ok:
-            self.branches_list.config(text='\n'.join(branches))
-            self.show_error('An error occurred while executing the request ({})'.format(branches))
-        else:
+            self.branches_list.insert(0, *branches)
             self.show_info('Branches fetched')
+        else:
+            self.show_error('An error occurred while executing the request ({})'.format(branches))
         return branches
 
     def init_services_checkboxes(self, frame, row):
@@ -120,6 +121,8 @@ class MainWindow:
     def branches_list_select(self, event):
         widget = event.widget
         selection = widget.curselection()
+        if not selection:
+            return
         selection_value = widget.get(selection[0])
         self.branch.set(selection_value)
 
