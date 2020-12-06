@@ -1,4 +1,5 @@
 import tkinter as tk
+
 from methods import TeamCity
 
 
@@ -94,6 +95,7 @@ class MainWindow:
 
         ok, branches = tc.get_branches(service)
         if ok:
+            self.branches_list.delete(0, tk.END)
             self.branches_list.insert(0, *branches)
             self.show_info('Branches fetched')
         else:
