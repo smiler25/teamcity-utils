@@ -1,4 +1,5 @@
 import argparse
+
 from methods import TeamCity
 
 
@@ -20,13 +21,15 @@ if __name__ == '__main__':
         exit()
 
     if args.list:
-        ok, pairs = tc.get_services()
+        ok, grouped_services = tc.get_services()
         if ok:
             print('Title -> Key')
-            for k, v in pairs:
-                print(v, k, sep=' -> ')
+            for project_name, services in grouped_services.items():
+                print('\nProject: {}'.format(project_name))
+                for k, v in services:
+                    print(v, k, sep=' -> ')
         else:
-            print('Error', pairs)
+            print('Error', grouped_services)
         exit()
 
     branch = args.branch

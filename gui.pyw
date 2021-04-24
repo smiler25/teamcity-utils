@@ -1,4 +1,5 @@
 import tkinter as tk
+from collections import defaultdict
 
 from methods import TeamCity
 
@@ -7,6 +8,8 @@ class MainWindow:
     def __init__(self, parent):
         self.parent = parent
         self.vars = {}
+        self.vars_projects = {}
+        self.vars_by_project = defaultdict(list)
 
         self.branch = tk.StringVar()
         self.personal = tk.BooleanVar()
@@ -39,7 +42,7 @@ class MainWindow:
         row += 1
 
         start_button = tk.Button(frame, text='Start', command=self.start)
-        start_button.grid(row=row, column=0, columnspan=4, padx=2, pady=2, sticky=tk.NSEW)
+        start_button.grid(row=row, column=1, columnspan=2, padx=2, pady=2, sticky=tk.NSEW)
         row += 1
 
         self.message_label = tk.Label(frame, relief=tk.GROOVE, anchor=tk.W, bg='white',
@@ -103,22 +106,37 @@ class MainWindow:
         return branches
 
     def init_services_checkboxes(self, frame, row):
-        ok, services = tc.get_services()
+        ok, grouped_services = tc.get_services()
         if not ok:
             self.show_error('Unable to get services')
             return
 
-        col = 0
         cb_in_col = 3
-        for key, name in services:
+        for project_name, services in grouped_services.items():
+            row += 1
             var = tk.BooleanVar()
-            tk.Checkbutton(frame, text=name, variable=var).grid(row=row, column=col, sticky=tk.W)
-            self.vars[key] = var
-            col += 1
-            if col == cb_in_col:
-                col = 0
-                row += 1
+            self.vars_projects[project_name] = var
+            tk.Checkbutton(frame, text=project_name, variable=var,
+                           command=lambda pn=project_name: self.on_project_checkbox(pn))\
+                .grid(row=row, column=0, sticky=tk.W)
+            row += 1
+            col = 0
+            for key, name in services:
+                var = tk.BooleanVar()
+                tk.Checkbutton(frame, text=name, variable=var).grid(row=row, column=col, sticky=tk.W)
+                self.vars[key] = var
+                self.vars_by_project[project_name].append(var)
+                col += 1
+                if col == cb_in_col:
+                    col = 0
+                    row += 1
         return row
+
+    def on_project_checkbox(self, project_name):
+        state = self.vars_projects[project_name].get()
+        services_vars = self.vars_by_project[project_name]
+        for var in services_vars:
+            var.set(state)
 
     def branches_list_select(self, event):
         widget = event.widget

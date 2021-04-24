@@ -2,6 +2,7 @@ import json
 import os
 import urllib.parse
 import urllib.request
+from collections import defaultdict
 from configparser import ConfigParser
 
 
@@ -46,11 +47,14 @@ class TeamCity:
         url = urllib.parse.urljoin(self.tc_host, '/app/rest/buildTypes')
         headers = {'Accept': 'application/json'}
         req = urllib.request.Request(url, headers=headers)
+        by_project = defaultdict(list)
         with urllib.request.urlopen(req) as resp:
             if resp.code != 200:
                 return False, resp.read().decode('utf-8')
             res = json.loads(resp.read().decode('utf-8'))
-            return True, [(o['id'], o['name']) for o in res['buildType']]
+            for one in res['buildType']:
+                by_project[one['projectName']].append((one['id'], one['name']))
+            return True, by_project
 
     def get_branches(self, service):
         url = urllib.parse.urljoin(self.tc_host,
