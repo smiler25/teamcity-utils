@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.font as tk_font
 from collections import defaultdict
 
 from methods import TeamCity
@@ -117,7 +118,8 @@ class MainWindow:
             var = tk.BooleanVar()
             self.vars_projects[project_name] = var
             tk.Checkbutton(frame, text=project_name, variable=var,
-                           command=lambda pn=project_name: self.on_project_checkbox(pn))\
+                           command=lambda pn=project_name: self.on_project_checkbox(pn),
+                           font=tk_font.Font(weight='bold'))\
                 .grid(row=row, column=0, sticky=tk.W)
             row += 1
             col = 0
